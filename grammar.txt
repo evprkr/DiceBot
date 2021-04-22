@@ -1,0 +1,9 @@
+roll		: die modifier? label?
+
+die 		: number? 'd' number
+
+modifier 	: [+-] number
+
+label 		: [a-zA-Z]*
+
+number  	: [0-9]+
