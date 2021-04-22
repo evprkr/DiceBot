@@ -14,11 +14,11 @@ DiceBot would see the two commands `[1d20-1* to hit]` and `[2d8 damage]`, roll y
 ### Formatting Quirks
 DiceBot understands certain symbols to mean certain things.
 
-###### Dice
+##### Dice
 It understands that `d8` and `1d8` mean the same thing.
 
-###### Modifiers
+##### Modifiers
 Modifiers can be applied to rolls with `+` or `-`, but modifiers (and all numbers actually) cannot contain decimals.
 
-###### Advantage/Disadvantage
+##### Advantage/Disadvantage
 You can roll with advantage or disadvantage by using an asterisk `*` after your die, for example: `[1d20*]`, DiceBot will roll two D20's and return the high and the low rolls formatted as `20 (1)`
