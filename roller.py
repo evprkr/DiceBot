@@ -1,4 +1,5 @@
 import re
+from random import randint
 from errors import *
 
 ###############################################################################################################
@@ -244,7 +245,7 @@ class Parser:
 
 ###############################################################################################################
 
-# VALUES
+# NODE VALUES
 class Number:
     def __init__(self, value):
         self.value = value
@@ -259,10 +260,46 @@ class Number:
             return Number(self.value - other.value), None
         else: return None, Error("Illegal operation")
 
+    def __repr__(self):
+        return str(self.value)
+
+class Label:
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return (str(self.value))
+
 # INTERPRETER CLASS
 class Interpeter:
     def __init__(self, rolls):
         self.rolls = rolls
+        self.error = none
+
+    # Roll Function
+    def roll_die(self, count, size):
+        rolls = []
+
+    # Visit Functions
+    def visit_RollNode(self, node):
+        die = self.visit_DieNode(node)
 
     def visit_DieNode(self, node):
+        count = self.visit_NumberNode(node.count)
+        size = self.visit_NumberNode(node.size)
+
+        result, error = self.roll_die(count, size)
+        if self.error:
+            if not self.error: self.error = "Roll error in visit_DieNode()"
+            return self.error
+
+        return result
+
+    def visit_ModifierNode(self, node):
         pass
+
+    def visit_NumberNode(self, node):
+        return Number(node.token.value)
+
+    def visit_LabelNode(self, node):
+        return Label(node.token.value)

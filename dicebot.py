@@ -5,10 +5,13 @@ from random import randint
 from roller import *
 from errors import *
 
-# TO DO LIST
+# Planned Features
 # - Add advantage/disadvantage rolls
 # - Keep track of users in a database, log rolls there
 # - Allow whitelisted users to award inspiration points to others
+
+# Known Bugs to Fix
+# - Labels can't contain numbers or symbols of any kind, the lexer doesn't support them yet
 
 ####################################
 #                                  #
