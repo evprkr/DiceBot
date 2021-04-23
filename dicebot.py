@@ -2,7 +2,7 @@ import praw
 import os, sys, time
 import datetime as dt
 from random import randint
-from parser import *
+from roller import *
 from errors import *
 
 # TO DO LIST

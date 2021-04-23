@@ -249,24 +249,20 @@ class Number:
     def __init__(self, value):
         self.value = value
 
-    def __repr__(self):
-        return str(self.value)
+    def math_add(self, other):
+        if isinstance(other, Number):
+            return Number(self.value + other.value), None
+        else: return None, Error("Illegal operation")
+
+    def math_sub(self, other):
+        if isinstance(other, Number):
+            return Number(self.value - other.value), None
+        else: return None, Error("Illegal operation")
 
 # INTERPRETER CLASS
 class Interpeter:
-    def visit(self, node):
-        method_name = f'visit_{type(node).__name__}'
-        method = getattr(self, method_name, self.no_visit_method)
-        return method(node)
-
-    def no_visit_method(self, node):
-        raise Exception(f"No visit_{type(node).__name__} method defined")
+    def __init__(self, rolls):
+        self.rolls = rolls
 
     def visit_DieNode(self, node):
-        pass
-
-    def visit_RollNode(self, node):
-        pass
-
-    def visit_LabelNode(self, node):
         pass
