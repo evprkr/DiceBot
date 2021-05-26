@@ -6,9 +6,10 @@ from roller import *
 from errors import *
 
 # Planned Features
-# - Add advantage/disadvantage rolls
+# - Advantage/disadvantage rolls
 # - Keep track of users in a database, log rolls there
 # - Allow whitelisted users to award inspiration points to others
+# - Commas in really big numbers
 
 # Known Bugs to Fix
 # - Labels can't contain numbers or symbols of any kind, the lexer doesn't support them yet
@@ -34,7 +35,7 @@ error_dm =          False # DM users when their roll fails (Default: False)
 ####################################
 #         BOT SETTINGS END         #
 ####################################
-# Not a good idea to modify anything below here, or in 'parser.py' or 'errors.py'
+# Not a good idea to modify anything below here, or in 'roller.py' or 'errors.py'
 # If you want something changed that isn't in the settings above, message me!
 
 # FUNCTIONS
@@ -50,53 +51,56 @@ reddit = praw.Reddit(
     password='Valuecharm1001$'
 )
 
+# CLEAR CONSOLE
+try: os.system('clear')
+except: os.system('cls')
+
 # BOT START
 start_time = get_timestamp()
 print(f'\n[ DiceBot is online at {start_time} ]')
 
 # TEST COMMENTS W/ DESCRIPTIONS
-comment = "Hey /u/_dice_bot roll me some fuckin dice -- I want [1d20-2 to hit] and [2d8+4 damage] and I want it NOW" # lots of text and two rolls
+#comment = "Hey /u/_dice_bot roll me some fuckin dice -- I want [1d20-2 to hit] and [2d8+4 damage] and I want it NOW" # lots of text and two rolls
 #comment = "This message has no commands in it. Har har har." # no roll commands at all (should give an error and response)
 #comment = "u/_dice_bot [d100 because i said so]" # roll without a leading '1'
 #comment = "/u/_dice_bot [999999d999999]" # really high numbers test
 #comment = "/u/_dice_bot [0d20] and [0d0] tests" # zero for amount or size
 
-lexer = Lexer(comment)
-tokens, error = lexer.tokenize()
-if error: 
-    print(error.as_string())
-    sys.exit(0)
-
-parser = Parser(tokens)
-rolls, error = parser.parse()
-if error:
-    print(error.as_string())
-    sys.exit(0)
-
-interpreter = Interpreter(rolls)
-result, error = interpreter.translate()
-if error:
-    print(error.as_string())
-    sys.exit(0)
-
-print(f"You rolled:")
-for i in range(len(result)):
-    print(f'{result[i]}')
-
 # CHECK INBOX LOOP
-#while True:
-#    try:
-#        for message in reddit.inbox.unread(limit=25):
-#            if 'u/_dice_bot' in str(item.body):
-#                timestamp = get_timestamp()
-#                comment = item.body.lower()
-#
-#                lexer = Lexer(comment)
-#                tokens, error = lexer.tokenize()
+while True:
+    try:
+        for item in reddit.inbox.unread(limit=25):
+            if 'u/_dice_bot' in str(item.body):
+                timestamp = get_timestamp()
+                comment = item.body.lower()
 
-#                parser = Parser(tokens)
-#                response, error = parser.parse()
-#                if error: print(error)
-#                else:
-#                    print(f"[{timestamp}] {response}")
-#                    sys.exit()
+                lexer = Lexer(comment)
+                tokens, error = lexer.tokenize()
+                if error:
+                    print(error.as_string())
+                    sys.exit(0)
+
+                parser = Parser(tokens)
+                rolls, error = parser.parse()
+                if error:
+                    print(error.as_string())
+                    sys.exit(0)
+
+                interpreter = Interpreter(rolls)
+                result, error = interpreter.translate()
+                if error:
+                    print(error.as_string())
+                    sys.exit(0)
+
+                item.mark_read() # Mark the comment as read so it won't be read again
+
+                # Construct and send the reply to the comment
+                output = ''
+                for i in range(len(result)):
+                    output += f'{result[i]}'
+
+                item.reply(output)
+
+    except Exception as e:
+        print(f"EXCEPTION: {e}")
+        sys.exit(0)
