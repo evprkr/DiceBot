@@ -54,29 +54,34 @@ reddit = praw.Reddit(
 start_time = get_timestamp()
 print(f'\n[ DiceBot is online at {start_time} ]')
 
-comment = "Hey /u/_dice_bot roll me some fuckin dice -- I want [1d20-2 to hit] and [2d8+4 damage] and I want it NOW"
-#comment = "This message has no commands in it. Har har har."
-
-#print(f"INPUT: {comment}")
+# TEST COMMENTS W/ DESCRIPTIONS
+comment = "Hey /u/_dice_bot roll me some fuckin dice -- I want [1d20-2 to hit] and [2d8+4 damage] and I want it NOW" # lots of text and two rolls
+#comment = "This message has no commands in it. Har har har." # no roll commands at all (should give an error and response)
+#comment = "u/_dice_bot [d100 because i said so]" # roll without a leading '1'
+#comment = "/u/_dice_bot [999999d999999]" # really high numbers test
+#comment = "/u/_dice_bot [0d20] and [0d0] tests" # zero for amount or size
 
 lexer = Lexer(comment)
 tokens, error = lexer.tokenize()
-if error: print(error.as_string())
-
-#print(f"TOKENS: {tokens}")
+if error: 
+    print(error.as_string())
+    sys.exit(0)
 
 parser = Parser(tokens)
 rolls, error = parser.parse()
-if error: print(error.as_string())
+if error:
+    print(error.as_string())
+    sys.exit(0)
 
-print(rolls)
-sys.exit(0)
+interpreter = Interpreter(rolls)
+result, error = interpreter.translate()
+if error:
+    print(error.as_string())
+    sys.exit(0)
 
-interpreter = Interpreter()
-result, error = interpreter.visit(rolls)
-if error: print(error.as_string())
-
-print(result)
+print(f"You rolled:")
+for i in range(len(result)):
+    print(f'{result[i]}')
 
 # CHECK INBOX LOOP
 #while True:

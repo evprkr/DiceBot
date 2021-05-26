@@ -216,6 +216,9 @@ class Parser:
 
         if self.token.type == T_NUMBER:
             count = NumberNode(self.token.value)
+            if int(count.value) == 0:
+                self.error = Error("Zero is not allowed in die count or die size")
+                return self.error
             self.advance()
 
         if self.token.type == T_DIE:
@@ -263,6 +266,14 @@ class Number:
     def __repr__(self):
         return str(self.value)
 
+class Modifier:
+    def __init__(self, operator, number):
+        self.operator = operator
+        self.number = number
+
+    def __repr__(self):
+        return f"{self.operator}{self.number}"
+
 class Label:
     def __init__(self, value):
         self.value = value
@@ -271,35 +282,49 @@ class Label:
         return (str(self.value))
 
 # INTERPRETER CLASS
-class Interpeter:
+class Interpreter:
     def __init__(self, rolls):
         self.rolls = rolls
-        self.error = none
+        self.error = None
 
-    # Roll Function
-    def roll_die(self, count, size):
-        rolls = []
+    def translate(self):
+        output = []
+        for roll in self.rolls:
+            result = self.roll_die(roll.die)
 
-    # Visit Functions
-    def visit_RollNode(self, node):
-        die = self.visit_DieNode(node)
+            # If the roll has a modifier, apply it
+            if roll.modifier != None:
+                result = self.apply_modifier(result, roll.modifier)
 
-    def visit_DieNode(self, node):
-        count = self.visit_NumberNode(node.count)
-        size = self.visit_NumberNode(node.size)
+            # If the roll has a label, attach it
+            if roll.label != None:
+                result = f"{result} {roll.label}"
 
-        result, error = self.roll_die(count, size)
-        if self.error:
-            if not self.error: self.error = "Roll error in visit_DieNode()"
-            return self.error
+            output.append(result)
 
-        return result
+        return output, None
 
-    def visit_ModifierNode(self, node):
-        pass
+    def roll_die(self, die):
+        results = []
+        roll_total = 0
+        try: count = int(die.count.value)
+        except: count = 1
+        size = int(die.size.value)
 
-    def visit_NumberNode(self, node):
-        return Number(node.token.value)
+        # Roll the specified number of dice
+        for i in range(count):
+            roll = randint(1, size)
+            results.append(roll)
 
-    def visit_LabelNode(self, node):
-        return Label(node.token.value)
+        # Add each roll to the total
+        for i in results:
+            roll_total += i
+
+        return roll_total
+
+    def apply_modifier(self, result, modifier):
+        operator = modifier.operator
+        number = int(modifier.number.value)
+
+        if operator == '+': return result + number
+        return result - number
