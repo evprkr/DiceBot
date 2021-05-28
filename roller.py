@@ -290,7 +290,7 @@ class Interpreter:
     def translate(self):
         output = []
         for roll in self.rolls:
-            result = self.roll_die(roll.die)
+            result, critical = self.roll_die(roll.die)
 
             # If the roll has a modifier, apply it
             if roll.modifier != None:
@@ -299,6 +299,9 @@ class Interpreter:
             # If the roll has a label, attach it
             if roll.label != None:
                 result = f"{result} {roll.label}"
+
+            # If the roll is a critical (only applies to 1d20 rolls)
+            if critical == True: result = f"{result} - *critical!*"
 
             output.append(result)
 
@@ -311,16 +314,21 @@ class Interpreter:
         except: count = 1
         size = int(die.size.value)
 
+        if count != 1 and size != 20: critical = False
+
         # Roll the specified number of dice
         for i in range(count):
             roll = randint(1, size)
             results.append(roll)
+            if count == 1 and roll == 20: critical = True
+            else: critical = False
+
 
         # Add each roll to the total
         for i in results:
             roll_total += i
 
-        return roll_total
+        return roll_total, critical
 
     def apply_modifier(self, result, modifier):
         operator = modifier.operator

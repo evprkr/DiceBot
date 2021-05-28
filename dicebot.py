@@ -5,11 +5,17 @@ from random import randint
 from roller import *
 from errors import *
 
+# TESTS TO RUN
+# zero rolls/die
+# no rolls in comment
+
 # Planned Features
 # - Advantage/disadvantage rolls
 # - Keep track of users in a database, log rolls there
 # - Allow whitelisted users to award inspiration points to others
 # - Commas in really big numbers
+# - "4d6 drop the lowest" for character stats
+# - Maybe random character generators with name, class, stats, etc just for fun
 
 # Known Bugs to Fix
 # - Labels can't contain numbers or symbols of any kind, the lexer doesn't support them yet
@@ -28,6 +34,12 @@ bot_managers = [   # These users will be messaged in the event of a critical err
     'aceavengers', # Add new usernames separated by commas (and inside the brackets)
 ]
 
+# Format Settings
+reply_template = "*You rolled...*\n\n" # Base template for replies, '\n' is a line break, this also accepts reddit formatting
+line_separators = False # Put line separators between each roll
+bold_rolls = False # Use bold text for rolls
+ital_rolls = False # Use italic text for rolls
+
 # Error Handling
 error_reply =       True # Reply to users when their roll fails (Default: True)
 error_dm =          False # DM users when their roll fails (Default: False)
@@ -41,6 +53,21 @@ error_dm =          False # DM users when their roll fails (Default: False)
 # FUNCTIONS
 def get_timestamp():
     return str(dt.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+
+def make_reply():
+    output = reply_template
+    if line_separators == True: output += '---\n\n'
+    for i in range(len(result)):
+        if bold_rolls and ital_rolls: output += f'***{result[i]}***' # Bold and italic enabled
+        elif bold_rolls: output += f'**{result[i]}**' # Bold enabled
+        elif ital_rolls: output += f'*{result[i]}*' # Italic enabled
+        else: output += f'{result[i]}' # Bold and italic disabled
+
+        if i < len(result)-1: # For every roll except the last one
+            if line_separators: output += '\n\n---\n\n' # Line separators enabled
+            else: output += '\n\n' # Line separators disabled
+
+    return output
 
 # REDDIT INSTANCE
 reddit = praw.Reddit(
@@ -58,13 +85,6 @@ except: os.system('cls')
 # BOT START
 start_time = get_timestamp()
 print(f'\n[ DiceBot is online at {start_time} ]')
-
-# TEST COMMENTS W/ DESCRIPTIONS
-#comment = "Hey /u/_dice_bot roll me some fuckin dice -- I want [1d20-2 to hit] and [2d8+4 damage] and I want it NOW" # lots of text and two rolls
-#comment = "This message has no commands in it. Har har har." # no roll commands at all (should give an error and response)
-#comment = "u/_dice_bot [d100 because i said so]" # roll without a leading '1'
-#comment = "/u/_dice_bot [999999d999999]" # really high numbers test
-#comment = "/u/_dice_bot [0d20] and [0d0] tests" # zero for amount or size
 
 # CHECK INBOX LOOP
 while True:
@@ -95,11 +115,11 @@ while True:
                 item.mark_read() # Mark the comment as read so it won't be read again
 
                 # Construct and send the reply to the comment
-                output = ''
-                for i in range(len(result)):
-                    output += f'{result[i]}'
-
+                output = make_reply()
                 item.reply(output)
+                print(output)
+
+            else: item.mark_read() # Mark non-roll messages as read just to get them out of the way
 
     except Exception as e:
         print(f"EXCEPTION: {e}")

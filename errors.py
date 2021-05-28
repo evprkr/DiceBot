@@ -4,7 +4,7 @@
 
 # ERROR RESPONSE MESSAGES (These can be modified, but can't contain double quotes or backslashes)
 # These messages are sent as replies or DMs (or both) depending on the settings in 'dicebot.py'
-NoCommandMessage = "I didn't find any commands in your comment, enter commands like so: [2d8+4 damage], commands can be anywhere in your comment and you can have as many as you want. (Labels like 'damage' or 'to hit' are optional)"
+NoCommandMessage = "I didn't find any commands in your comment, enter commands like so: [2d8+4 damage], commands can be anywhere in your comment and you can have as many as you want. (Labels like 'damage' or 'to hit' or 'because I said so' are optional)"
 ZeroRollMessage = "I can't roll zero dice! (Or a zero-sided die either, I'm not really sure how that would work."
 
 # ERROR CLASS
