@@ -53,7 +53,7 @@ class Lexer:
 
         # CHECK COMMENT TEXT FOR COMMANDS
         cmd_list = self.extract_commands()
-        if cmd_list == None: return None, NoCommandError('No command found in comment')
+        if cmd_list == None: return None, NoCommandError('No command found in comment', NoCommandMessage)
         cmd_string = str(cmd_list)
         self.text = cmd_string.strip('[').strip(']')
         #print(f"COMMANDS: {self.text}")
@@ -187,8 +187,7 @@ class Parser:
                 return self.error
             self.advance()
         else:
-            print(self.token)
-            self.error = Error("Expected NUMBER or DIE token in parse_roll()")
+            self.error = InvalidCommandError(f"Expected NUMBER or DIE token in parse_roll(), found {self.token.type}")
             return self.error
 
         # PARSE MODIFIER (OPTIONAL)
@@ -217,7 +216,7 @@ class Parser:
         if self.token.type == T_NUMBER:
             count = NumberNode(self.token.value)
             if int(count.value) == 0:
-                self.error = Error("Zero is not allowed in die count or die size")
+                self.error = ZeroRollError("Zero is not allowed in die count or die size")
                 return self.error
             self.advance()
 
@@ -226,6 +225,9 @@ class Parser:
             if self.token.type == T_NUMBER: size = NumberNode(self.token.value)
             else: self.error = Error("Expected NUMBER token in parse_die()")
             size = NumberNode(int(self.token.value))
+        else:
+            self.error = InvalidCommandError("Invalid command")
+            return self.error
 
         return DieNode(count, size)
 
@@ -291,10 +293,12 @@ class Interpreter:
         output = []
         for roll in self.rolls:
             result, critical = self.roll_die(roll.die)
+            if self.error: return None, self.error
 
             # If the roll has a modifier, apply it
             if roll.modifier != None:
                 result = self.apply_modifier(result, roll.modifier)
+                if self.error: return None, self.error
 
             # If the roll has a label, attach it
             if roll.label != None:
@@ -314,6 +318,10 @@ class Interpreter:
         except: count = 1
         size = int(die.size.value)
 
+        if size == 0:
+            self.error = ZeroRollError("Size of die cannot be zero")
+            return None, None
+
         if count != 1 and size != 20: critical = False
 
         # Roll the specified number of dice
@@ -322,7 +330,6 @@ class Interpreter:
             results.append(roll)
             if count == 1 and roll == 20: critical = True
             else: critical = False
-
 
         # Add each roll to the total
         for i in results:
