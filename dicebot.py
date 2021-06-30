@@ -21,6 +21,7 @@ from errors import *
 # Known Bugs to Fix
 # - Labels can't contain numbers or symbols of any kind, the lexer just ignores them
 # - Empty brackets are given an empty roll response instead of an error
+# - Server errors ouput a bunch of nonsense to the console (not fatal)
 
 ####################################
 #                                  #
@@ -33,23 +34,24 @@ from errors import *
 # Admin Settings
 bot_managers = [   # These users will be messaged in the event of a critical error or bot crash
     'Nose_Fetish', # Please do not remove me! I need to know when bad errors happen :)
-    #'aceavengers', # Add new usernames separated by commas (and inside the brackets)
+    'aceavengers', # Add new usernames separated by commas (and inside the brackets)
 ]
 
 # Format Settings
-reply_template = "*You rolled...*\n\n" # Base template for replies, '\n' is a line break, this also accepts reddit formatting
-line_separators = False # Put line separators between each roll
-bold_rolls = False # Use bold text for rolls
-ital_rolls = False # Use italic text for rolls
+reply_template =  "*You rolled...*\n\n" # Base template for replies, '\n' is a line break, this also accepts reddit formatting
+line_separators = False                 # Put line separators between each roll
+bold_rolls =      False                 # Use bold text for rolls
+ital_rolls =      False                 # Use italic text for rolls
 
 # Error Handling
-error_reply =       True # Reply to users when their roll fails (Default: True)
-# error_dm =          False # DM users when their roll fails (Default: False) NOT IMPLEMENTED
+retry_wait_time = 60    # Time to wait (in seconds) before retrying after a server connection error
+error_reply =     True  # Reply to users when their roll fails (Default: True)
+# error_dm =      False # DM users when their roll fails (Default: False) ** NOT IMPLEMENTED **
 
 ####################################
 #         BOT SETTINGS END         #
 ####################################
-# Not a good idea to modify anything below here, or in 'roller.py' or 'errors.py'
+# Not a good idea to modify anything below here, or in 'roller.py', you can edit error messages in 'errors.py'
 # If you want something changed that isn't in the settings above, message me!
 
 # FUNCTIONS
@@ -90,7 +92,7 @@ print(f'\n[ DiceBot is online at {start_time} ] CTRL+C to exit')
 
 # CHECK INBOX LOOP
 while True:
-#    try:
+    try:
         for item in reddit.inbox.unread(limit=25):
             if 'u/_dice_bot' in str(item.body):
                 timestamp = get_timestamp()
@@ -149,6 +151,10 @@ while True:
 
             else: item.mark_read() # Mark non-roll messages as read just to get them out of the way
 
-#    except Exception as e:
-#        print(f"EXCEPTION: {e}")
-#        sys.exit(0)
+    except Exception as e: # This should only happen when the bot encounters a server error while trying to check the inbox
+        s = retry_wait_time # It'll wait a specified amount of time before trying again to avoid spamming the console with errors
+        while s > 0:
+            s -= 1
+            print(f"ERROR: {e} -- Trying again in {s} seconds...", end="\r")
+            time.sleep(1)
+        continue
