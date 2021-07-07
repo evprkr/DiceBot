@@ -5,23 +5,12 @@ from random import randint
 from roller import *
 from errors import *
 
-# TESTS TO RUN
-# zero rolls/die
-# no rolls in comment
-
-# Planned Features
-# - Advantage/disadvantage rolls
+# Possible Planned Features (not logged on repo)
 # - Keep track of users in a database, log rolls there
 # - Allow whitelisted users to award inspiration points to others
-# - Commas in really big numbers
 # - "4d6 drop the lowest" for character stats
 # - Maybe random character generators with name, class, stats, etc just for fun
 # - More descriptive error messages (mentioning which command caused the error)
-
-# Known Bugs to Fix
-# - Labels can't contain numbers or symbols of any kind, the lexer just ignores them
-# - Empty brackets are given an empty roll response instead of an error
-# - Server errors ouput a bunch of nonsense to the console (not fatal)
 
 ####################################
 #                                  #
