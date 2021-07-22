@@ -63,12 +63,12 @@ def make_reply():
     return output
 
 # REDDIT INSTANCE
-reddit = praw.Reddit(
-    client_id='6J61rYtJNMLj9w',
-    client_secret='yam8U2tAXY6X02369hMRyqH9kQNTZQ',
-    user_agent='<console:DRB:1.0.0>',
-    username='_dice_bot',
-    password='Valuecharm1001$'
+
+reddit = praw.Reddit(user_agent=os.environ['AGENT_NAME'] ,
+                     client_id=os.environ['PRAW_ID'] ,
+                     client_secret=os.environ['PRAW_SECRET'] ,
+                     password=os.environ['REDDIT_PW'] ,
+                     username=os.environ['REDDIT_USER']
 )
 
 # CLEAR CONSOLE
